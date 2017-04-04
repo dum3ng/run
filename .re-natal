@@ -9,7 +9,8 @@
   },
   "modules": [
     "react-native-maps",
-    "react-native-vector-icons/FontAwesome"
+    "react-native-vector-icons/FontAwesome",
+    "realm"
   ],
   "imageDirs": [
     "images"
