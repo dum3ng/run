@@ -22,8 +22,6 @@
 
 (def ReactNative (js/require "react-native"))
 
-(def MapView (js/require "react-native-maps"))
-(def map-view (r/adapt-react-class MapView))
 
 (def Icon (js/require "react-native-vector-icons/FontAwesome"))
 (def tabbar-item-ios (r/adapt-react-class (.-TabBarItemIOS Icon)))

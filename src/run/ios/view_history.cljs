@@ -1,5 +1,11 @@
 (ns run.ios.view-history
-  (:require [run.common.rn :refer [view]]))
+  (:require [run.common.rn :refer [view
+                                   text
+                                   touchable-highlight]]
+            [reagent.core :as r]))
+
+(def MapView (js/require "react-native-maps"))
+(def map-view (r/adapt-react-class MapView))
 
 (defn view-history
   []

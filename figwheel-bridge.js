@@ -227,9 +227,12 @@ function loadApp(platform, devHost, onLoadCb) {
 }
 
 function startApp(appName, platform, devHost) {
-    ReactNative.AppRegistry.registerComponent(
-        appName, () => figwheelApp(platform, devHost));
+  loadApp(platform, devHost, ()=>{})
 }
+// function startApp(appName, platform, devHost) {
+//     ReactNative.AppRegistry.registerComponent(
+//         appName, () => figwheelApp(platform, devHost));
+// }
 
 function withModules(moduleById) {
     externalModules = moduleById;
