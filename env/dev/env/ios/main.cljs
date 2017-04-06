@@ -14,4 +14,5 @@
  :heads-up-display false
  :jsload-callback #(swap! cnt inc))
 
+(print "start")
 (core/init)
