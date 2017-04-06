@@ -2499,13 +2499,13 @@ lodash.templatesettings@^3.0.0:
     lodash._reinterpolate "^3.0.0"
     lodash.escape "^3.0.0"
 
+lodash@4.x.x, lodash@^4.0.0, lodash@^4.14.0, lodash@^4.16.6, lodash@^4.2.0, lodash@^4.3.0, lodash@^4.6.1:
+  version "4.17.4"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
+
 lodash@^3.5.0:
   version "3.10.1"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
-
-lodash@^4.0.0, lodash@^4.14.0, lodash@^4.16.6, lodash@^4.2.0, lodash@^4.3.0, lodash@^4.6.1:
-  version "4.17.4"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
 
 longest@^1.0.1:
   version "1.0.1"
@@ -3059,6 +3059,12 @@ react-deep-force-update@^1.0.0:
 react-native-maps@^0.13.1:
   version "0.13.1"
   resolved "https://registry.yarnpkg.com/react-native-maps/-/react-native-maps-0.13.1.tgz#ed2a7e62f155a51f43c49742eba5bc313eaf2f1e"
+
+react-native-navigation@next:
+  version "2.0.0-experimental.275"
+  resolved "https://registry.yarnpkg.com/react-native-navigation/-/react-native-navigation-2.0.0-experimental.275.tgz#468880726ca2d0d467138b760e58af70b993fb62"
+  dependencies:
+    lodash "4.x.x"
 
 react-native-vector-icons@^4.0.0:
   version "4.0.0"
@@ -3872,7 +3878,7 @@ utils-merge@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.0.tgz#0294fb922bb9375153541c4f7096231f287c8af8"
 
-uuid@^3.0.0:
+uuid@^3.0.0, uuid@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.0.1.tgz#6544bba2dfda8c1cf17e629a3a305e2bb1fee6c1"
 

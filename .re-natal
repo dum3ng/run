@@ -10,7 +10,10 @@
   "modules": [
     "react-native-maps",
     "react-native-vector-icons/FontAwesome",
-    "realm"
+    "realm",
+    "realm/react-native",
+    "uuid",
+    "react-native-navigation"
   ],
   "imageDirs": [
     "images"
