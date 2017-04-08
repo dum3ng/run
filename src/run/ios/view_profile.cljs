@@ -31,7 +31,7 @@
         [f l & none] (clojure.string/split s #"\." )]
     (str f (take digit l))))
 
-(defn view-profile
+(defn view-profile-
   []
   (let [profiles (.objects realm "Profile")
         profile (aget profiles 0)]
@@ -48,3 +48,7 @@
              "age" profile.age})
 
        ])))
+
+(def view-profile (with-meta view-profile-
+                    {:navigationOptions
+                     (clj->js {:tabBar {:label "Profile"}})}))

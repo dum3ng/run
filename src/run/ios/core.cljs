@@ -30,69 +30,70 @@
 
 (def list-view (r/adapt-react-class ListView))
 
-(def Navigation (.-Navigation (js/require "react-native-navigation")))
-
-(register-screens)
-(defn start []
-  (let [names #js ["clock-o" "hourglass-end" "cog" "snowflake-o"]
-        promises (.map names (fn [n] (.getImageSource Icon n 20 "black")))]
-    (-> js/Promise
-        (.all promises)
-        (.then (fn [values]
-                 (.startTabBasedApp Navigation
-                                    (clj->js {:tabs [{:label "schedule"
-                                                      :screen "run.schedule-screen"
-                                                      :title "schedule"
-                                                      :icon (aget values 0)
-                                                      :navigatorStyle  {:statusBarHidden true}}
-                                                     {:label "history"
-                                                      :screen "run.history-screen"
-                                                      :icon (aget values 1)
-                                                      :title "history"}
-                                                     {:label "profile"
-                                                      :icon (aget values 2)
-                                                      :screen "run.profile-screen"
-                                                      :title "profile"}
-                                                     {:label "weather"
-                                                      :icon (aget values 3)
-                                                      :screen "run.weather-screen"
-                                                      :navigatorStyle {:navBarHidden true}}
-
-                                                     ]})))))))
+(def Navigation (js/require "react-navigation"))
+(def TabNavigator (.-TabNavigator Navigation))
 
 
-(defn -start []
-  (.startTabBasedApp Navigation
-                     (clj->js {:tabs [{:label "schedule"
-                                       :screen "run.schedule-screen"
-                                       :title "schedule"
-                                       :navigatorStyle  {:statusBarHidden true}}
-                                      {:label "history"
-                                       :screen "run.history-screen"
-                                       :title "history"}
-                                      {:label "profile"
-                                       :screen "run.profile-screen"
-                                       :title "profile"}
-                                      {:label "weather"
-                                       :screen "run.weather-screen"
-                                       :navigatorStyle {:navBarHidden true}}
-                                      ]})))
-(defn view-2
-  []
-  (let [ds (ListView.DataSource. #js{:rowHasChanged #(= %1 %2)}) ]
-    (r/create-class {:get-initial-state (fn [this] {:data-source (.cloneWithRows ds #js[3 4 5] )})
-                     :render (fn [this]
-                               [list-view {:dataSource (:data-source (r/state this))
-                                           "renderRow"   (fn [row] (r/as-element [text row]))}])})))
+(defn wrap-navigation-options
+  [c opt]
+  (let [rc (r/reactify-component c)]
+    (aset rc "navigationOptions"
+          (clj->js opt))
+    rc))
 
+(defn tab-icon
+  [name tint size]
+  (let [s (r/atom )]
+    (-> (.getImageSource Icon name size tint)
+        (.then (fn [source]
+                 (reset! s source))))
+    (fn [name tint size]
+      [image {:source @s
+              :style {:width size
+                      :height size}}])))
+
+(def Schedule
+  (wrap-navigation-options view-schedule
+                           {:tabBar
+                            {:label "Schedule"
+                             :icon (fn [props]
+                                     (r/as-element
+                                      [tab-icon "table" props.tintColor 20]))}}))
+(def History
+  (wrap-navigation-options view-history
+                           {:tabBar
+                            {:label "History"
+                             :icon (fn [props] (r/as-element
+                                               [tab-icon "hourglass-end" props.tintColor 20]))}}))
+
+(def Profile
+  (wrap-navigation-options view-profile
+                           {:tabBar
+                            {:label "Profile"
+                             :icon (fn [props] (r/as-element
+                                               [tab-icon "cog" props.tintColor 20]))}}))
+
+(def Weather
+  (wrap-navigation-options view-weather
+                           {:tabBar
+                            {:label "Weather"
+                             :icon (fn [props] (r/as-element
+                                               [tab-icon "snowflake-o" props.tintColor 20]))}}))
+
+(def App (TabNavigator. (clj->js {:Schedule {:screen Schedule}
+                                  :History {:screen History}
+                                  :Profile {:screen Profile}
+                                  :Weather {:screen Weather}
+                                  })
+                        (clj->js {:tabBarOptions {:activeTintColor "#e91e63"}})))
+
+;; app-root must be a reagent component to use figwheel reload
+;; in prod environment, no need to do these transforms
+;; we can just use the =App= defined above
+(def app (r/adapt-react-class App))
 (defn app-root []
-  (fn []
-    [view
-     [text "app"]]
-    ))
+  [app])
 
-;; (defn init []
-;;   (dispatch-sync [:initialize-db])
-;;   (.registerComponent app-registry "run" #(r/reactify-component app-root)))
 (defn init []
-  (start))
+  (dispatch-sync [:initialize-db])
+  (.registerComponent app-registry "run" #(r/reactify-component app-root)))

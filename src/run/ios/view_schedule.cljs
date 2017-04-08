@@ -12,6 +12,8 @@
                                             group
                                             shape]]))
 
+
+
 (def logo-img (js/require "./images/cljs.png"))
 
 
@@ -36,8 +38,6 @@
   (let [greeting (subscribe [:get-greeting])
         tabs-states ["shown" "hidden"]
         tabs-state (atom 0)]
-    (.switchToTab (:navigator props)
-                  #js{:tabIndex 3})
     (fn [props]
       [view
        {:style {:flex-direction "column"
@@ -56,9 +56,7 @@
                  :text-align "center"}} @greeting]
        [image
         {:source logo-img
-         :style  {:width 80
-                  :height 80
-                  :margin-bottom 30}}]
+         }]
        [button "press"  #(.alert alert "HELLO!")]
        [touchable-highlight
         {:style {:background-color "#999"
@@ -84,4 +82,6 @@
        ])))
 
 (def view-schedule (with-meta view-schedule-
-                     {:navigatorStyle #js{:navBarTextColor "yellow"}}))
+                     {:navigationOptions
+                      (clj->js {:tabBar {:label "Home"
+                                         } })}))

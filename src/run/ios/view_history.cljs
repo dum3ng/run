@@ -7,7 +7,7 @@
 (def MapView (js/require "react-native-maps"))
 (def map-view (r/adapt-react-class MapView))
 
-(defn view-history
+(defn view-history-
   []
   (let [region (r/atom {:latitude 31.78825
                         :longitude 121.4324
@@ -40,3 +40,8 @@
                                          (swap! region merge {:latitude-delta (* @lat-d 0.5)
                                                               :longitude-delta (* @long-d 0.5)}))}
         [text "-"]]])))
+
+
+(def view-history (with-meta view-history-
+                    {:navigationOptions
+                     (clj->js {:tabBar {:label "History"}})}))

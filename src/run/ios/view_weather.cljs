@@ -39,7 +39,7 @@
       0
       (/ DELTA d ))))
 ;; weather
-(defn view-weather
+(defn view-weather-
   []
   (let [data (r/atom {})
         fetching (r/atom true)]
@@ -65,10 +65,8 @@
                a (average (:temps @data))
                p (do (doseq [[t i] (zipmap (:temps @data) (range 5))]
                        (.lineTo p (+ 40 (* i 40))  (* f (- t a)) ))
-                     (print (.toJSON p) " : should")
                      p)
                d (.toJSON p)]
-           (print d)
            [view
             [text
              {:style {:font-size 30
@@ -88,3 +86,7 @@
                       :stroke "white"
                       :stroke-width 3}]]]]))
        ])))
+
+(def view-weather (with-meta view-weather-
+                    {:navigationOptions
+                     (clj->js {:tabBar {:label "Weather"}})}))
