@@ -13,7 +13,9 @@
     "realm",
     "realm/react-native",
     "uuid",
-    "react-native-navigation"
+    "react-native-navigation",
+    "d3",
+    "d3-shape"
   ],
   "imageDirs": [
     "images"

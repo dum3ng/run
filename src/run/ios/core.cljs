@@ -34,15 +34,49 @@
 
 (register-screens)
 (defn start []
+  (let [names #js ["clock-o" "hourglass-end" "cog" "snowflake-o"]
+        promises (.map names (fn [n] (.getImageSource Icon n 20 "black")))]
+    (-> js/Promise
+        (.all promises)
+        (.then (fn [values]
+                 (.startTabBasedApp Navigation
+                                    (clj->js {:tabs [{:label "schedule"
+                                                      :screen "run.schedule-screen"
+                                                      :title "schedule"
+                                                      :icon (aget values 0)
+                                                      :navigatorStyle  {:statusBarHidden true}}
+                                                     {:label "history"
+                                                      :screen "run.history-screen"
+                                                      :icon (aget values 1)
+                                                      :title "history"}
+                                                     {:label "profile"
+                                                      :icon (aget values 2)
+                                                      :screen "run.profile-screen"
+                                                      :title "profile"}
+                                                     {:label "weather"
+                                                      :icon (aget values 3)
+                                                      :screen "run.weather-screen"
+                                                      :navigatorStyle {:navBarHidden true}}
+
+                                                     ]})))))))
+
+
+(defn -start []
   (.startTabBasedApp Navigation
                      (clj->js {:tabs [{:label "schedule"
                                        :screen "run.schedule-screen"
-                                       :title "schedule"}
+                                       :title "schedule"
+                                       :navigatorStyle  {:statusBarHidden true}}
                                       {:label "history"
                                        :screen "run.history-screen"
-                                       :title "history"}]})))
-
-
+                                       :title "history"}
+                                      {:label "profile"
+                                       :screen "run.profile-screen"
+                                       :title "profile"}
+                                      {:label "weather"
+                                       :screen "run.weather-screen"
+                                       :navigatorStyle {:navBarHidden true}}
+                                      ]})))
 (defn view-2
   []
   (let [ds (ListView.DataSource. #js{:rowHasChanged #(= %1 %2)}) ]
@@ -51,37 +85,10 @@
                                [list-view {:dataSource (:data-source (r/state this))
                                            "renderRow"   (fn [row] (r/as-element [text row]))}])})))
 
-(defn tabbar-view
-  []
-  (let [selected (atom 2)]
-    (fn []
-      [tabbar-ios
-       [tabbar-item-ios {:title "one"
-                         :icon-name "heart"
-                         :selected (= @selected 0)
-                         :on-press #(reset! selected 0)}
-        [view-schedule]]
-       [tabbar-item-ios {:title "two"
-                         :icon-name "th"
-                         :selected (= @selected 1)
-                         :on-press #(reset! selected 1)}
-
-        [view-history]]
-       [tabbar-item-ios {:title "three"
-                         :icon-name "cog"
-                         :selected (= @selected 2)
-                         :on-press #(reset! selected 2)}
-        [view-profile]]
-       [tabbar-item-ios {:title "weather"
-                         :icon-name "sun-o"
-                         :selected (= @selected 3)
-                         :on-press #(reset! selected 3)}
-        [view-weather]]])))
-
-
 (defn app-root []
   (fn []
-    [tabbar-view]
+    [view
+     [text "app"]]
     ))
 
 ;; (defn init []

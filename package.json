@@ -8,12 +8,16 @@
     "test": "jest"
   },
   "dependencies": {
+    "art": "^0.10.1",
     "babel-plugin-transform-es2015-block-scoping": "6.15.0",
+    "d3": "^4.7.4",
+    "d3-shape": "^1.0.6",
     "react": "~15.4.1",
     "react-native": "0.42.0",
     "react-native-maps": "^0.13.1",
     "react-native-navigation": "2.0.0-experimental.275",
     "react-native-vector-icons": "^4.0.0",
+    "react-navigation": "^1.0.0-beta.7",
     "realm": "^1.2.0",
     "uuid": "^3.0.1"
   },
@@ -25,5 +29,5 @@
   },
   "jest": {
     "preset": "react-native"
-	}
+  }
 }
