@@ -15,16 +15,13 @@
             [run.common.schema :refer [realm]]
             [run.ios.view-schedule :refer [view-schedule]]
             [run.ios.view-history :refer [view-history]]
-            [run.ios.view-profile :refer [view-profile]]
+            [run.ios.view-profile :refer [Profile]]
             [run.ios.view-weather :refer [view-weather]]
-            [run.ios.screens :refer [register-screens]]
+            [run.common.utils :refer [wrap-navigation-options]]
+            [run.common.core :refer [icon]]
             ))
 
 (def ReactNative (js/require "react-native"))
-
-
-(def Icon (js/require "react-native-vector-icons/FontAwesome"))
-(def tabbar-item-ios (r/adapt-react-class (.-TabBarItemIOS Icon)))
 
 (def ListView  (.-ListView (js/require "realm/react-native")))
 
@@ -34,56 +31,38 @@
 (def TabNavigator (.-TabNavigator Navigation))
 
 
-(defn wrap-navigation-options
-  [c opt]
-  (let [rc (r/reactify-component c)]
-    (aset rc "navigationOptions"
-          (clj->js opt))
-    rc))
-
-(defn tab-icon
-  [name tint size]
-  (let [s (r/atom )]
-    (-> (.getImageSource Icon name size tint)
-        (.then (fn [source]
-                 (reset! s source))))
-    (fn [name tint size]
-      [image {:source @s
-              :style {:width size
-                      :height size}}])))
-
 (def Schedule
   (wrap-navigation-options view-schedule
                            {:tabBar
                             {:label "Schedule"
                              :icon (fn [props]
                                      (r/as-element
-                                      [tab-icon "table" props.tintColor 20]))}}))
+                                      [icon "table" props.tintColor 20]))}}))
 (def History
   (wrap-navigation-options view-history
                            {:tabBar
                             {:label "History"
                              :icon (fn [props] (r/as-element
-                                               [tab-icon "hourglass-end" props.tintColor 20]))}}))
+                                               [icon "hourglass-end" props.tintColor 20]))}}))
 
-(def Profile
-  (wrap-navigation-options view-profile
-                           {:tabBar
-                            {:label "Profile"
-                             :icon (fn [props] (r/as-element
-                                               [tab-icon "cog" props.tintColor 20]))}}))
+(aset Profile "navigationOptions"
+      (clj->js {:tabBar
+                {:label "Profile"
+                 :icon (fn [props] (r/as-element
+                                   [icon "cog" props.tintColor 20]))}}))
+
 
 (def Weather
   (wrap-navigation-options view-weather
                            {:tabBar
                             {:label "Weather"
                              :icon (fn [props] (r/as-element
-                                               [tab-icon "snowflake-o" props.tintColor 20]))}}))
+                                               [icon "snowflake-o" props.tintColor 20]))}}))
 
 (def App (TabNavigator. (clj->js {:Schedule {:screen Schedule}
                                   :History {:screen History}
                                   :Profile {:screen Profile}
-                                  :Weather {:screen Weather}
+                                  ;;  :Weather {:screen Weather}
                                   })
                         (clj->js {:tabBarOptions {:activeTintColor "#e91e63"}})))
 

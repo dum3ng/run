@@ -3,6 +3,7 @@
                                    alert
                                    text
                                    image
+                                   modal
                                    touchable-highlight]]
             [run.events]
             [run.subs]
@@ -36,8 +37,8 @@
 (defn view-schedule-
   [props]
   (let [greeting (subscribe [:get-greeting])
-        tabs-states ["shown" "hidden"]
-        tabs-state (atom 0)]
+        visible (r/atom false)
+        ]
     (fn [props]
       [view
        {:style {:flex-direction "column"
@@ -62,23 +63,20 @@
         {:style {:background-color "#999"
                  :padding 10
                  :border-radius 5}
-         :onPress #(-> (:navigator props)
-                       (.setTitle #js{:title (str (rand))}))}
-        [text
-         {:style {:color "white"
-                  :text-align "center"
-                  :font-weight "bold"}} "change title"]]
-       [button "toggle tabbar " (fn [e] (do (swap! tabs-state #(mod (inc %) 2))
-                                           (-> (:navigator props)
-                                               (.toggleTabs
-                                                #js{:to (nth tabs-states @tabs-state)
-                                                    :animated true}))))]
-       [button "toggle navbar" (fn [e]
-                                 (let [navigator (:navigator props)
-                                       s ()]
-                                   (-> navigator
-                                       (.toggleNavBar
-                                        #js {:to "hidden"}))))]
+         :on-press #(do (print @visible)
+                        (swap! visible not))}
+        [text "open modal"]]
+       [modal {:visible @visible
+               :animation-type "slide"
+               :transparent false}
+        [view {:style {:background-color "red"}}
+         [text "modal"]
+         [touchable-highlight
+          {:style {:background-color "#999"
+                   :padding 10
+                   :border-radius 5}
+           :on-press #(swap! visible not)}
+          [text "toggle"]]]]
        ])))
 
 (def view-schedule (with-meta view-schedule-

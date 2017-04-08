@@ -24,7 +24,7 @@
 
 (reg-event-db
  :initialize-db
- validate-spec
+
  (fn [_ _]
    app-db))
 
@@ -33,3 +33,9 @@
  validate-spec
  (fn [db [_ value]]
    (assoc db :greeting value)))
+
+(reg-event-db
+ :get-profile
+ (fn [db [_ p]]
+   (:pr))
+ )

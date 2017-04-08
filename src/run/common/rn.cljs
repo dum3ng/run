@@ -17,6 +17,7 @@
 (def navigator (r/adapt-react-class (.-Navigator ReactNative)))
 (def navigator-ios (r/adapt-react-class (.-NavigatorIOS ReactNative)))
 (def picker (r/adapt-react-class (.-Picker ReactNative)))
+(def picker-item (r/adapt-react-class (.-Item (.-Picker ReactNative))))
 (def picker-ios (r/adapt-react-class (.-PickerIOS ReactNative)))
 (def progress-bar-android (r/adapt-react-class (.-ProgressBarAndroid ReactNative)))
 (def progress-view-ios (r/adapt-react-class (.-ProgressViewIOS ReactNative)))
