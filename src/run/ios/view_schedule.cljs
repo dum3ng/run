@@ -11,7 +11,8 @@
             [re-frame.core :refer [subscribe]]
             [run.common.art :as art :refer [surface
                                             group
-                                            shape]]))
+                                            shape]]
+            [run.common.core :refer [self-modal]]))
 
 
 
@@ -66,9 +67,9 @@
          :on-press #(do (print @visible)
                         (swap! visible not))}
         [text "open modal"]]
-       [modal {:visible @visible
-               :animation-type "slide"
-               :transparent false}
+       [self-modal {:visible-atom visible
+                    :animation-type "slide"
+                    :transparent false}
         [view {:style {:background-color "red"}}
          [text "modal"]
          [touchable-highlight

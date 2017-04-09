@@ -9,12 +9,8 @@
  (fn [db _]
    (:greeting db)))
 
+;;TODO: dispatch is asynchronous?
 (reg-sub
  :get-profile
  (fn [db _]
-   (let [p (:profile p)]
-     (cond
-       (= 0 (count p)) p
-       :else (let [profile (-> (.objects "Profile" realm)
-                               (aget 0))]
-               (dispatch [:set-profile profile]))))))
+   (:profile db)))

@@ -2,6 +2,7 @@
   (:require
    [re-frame.core :refer [reg-event-db after]]
    [clojure.spec :as s]
+   [run.common.schema :refer [realm]]
    [run.db :as db :refer [app-db]]))
 
 ;; -- Interceptors ------------------------------------------------------------
@@ -20,6 +21,8 @@
     (after (partial check-and-throw ::db/app-db))
     []))
 
+
+
 ;; -- Handlers --------------------------------------------------------------
 
 (reg-event-db
@@ -34,8 +37,15 @@
  (fn [db [_ value]]
    (assoc db :greeting value)))
 
+
 (reg-event-db
- :get-profile
- (fn [db [_ p]]
-   (:pr))
- )
+ :set-profile
+ (fn [db [_ value]]
+   (assoc db :profile value)))
+
+(reg-event-db
+ :refresh-profile
+ (fn [db [_]]
+   (let [profile (-> (.objects  realm "Profile")
+                     (aget 0))]
+     (assoc db :profile profile ))))

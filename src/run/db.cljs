@@ -8,4 +8,5 @@
 
 ;; initial state of app-db
 (def app-db {:greeting "Hello Clojure in iOS and Android!"
-             :profile {}})
+             :profile nil
+             :need-refresh false})

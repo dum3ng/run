@@ -1,5 +1,8 @@
 (ns run.ios.view-profile
   (:require [reagent.core :as r]
+            [run.events]
+            [run.subs]
+            [re-frame.core :refer [subscribe dispatch]]
             [run.common.schema :refer [realm]]
             [run.common.rn :refer [view
                                    text
@@ -7,11 +10,14 @@
                                    touchable-opacity
                                    picker
                                    picker-item
-                                   modal
+                                   list-view
+                                   scroll-view
+                                   touchable-highlight
                                    ]]
             [run.common.utils :refer [wrap-navigation-options]]
             [run.common.core :refer [icon
-                                     re-text-input]]
+                                     re-text-input
+                                     self-modal]]
             ))
 
 (def styles {:key-text {:padding-top 15
@@ -58,29 +64,22 @@
 
 (defn view-profile-
   [props]
-  (let [profiles (.objects realm "Profile")
-        profile (aget profiles 0)]
+  (let [profile (subscribe [:get-profile])]
+    (if (nil? @profile) (dispatch [:refresh-profile]))
     (fn [props]
       [view
-       (map (fn [t]
-              ^{:key (key t)} [view
-                               [label-view (key t)]
-                               [value-text (val t)]])
-            {"name" profile.username
-             "sex" profile.sex
-             "height" profile.height
-             "weight" profile.weight
-             "age" profile.age})
-
+       (if (not (nil? @profile))
+         (map (fn [t]
+                ^{:key (key t)} [view
+                                 [label-view (key t)]
+                                 [value-text (val t)]])
+              {"name" (.-username @profile)
+               "sex" (.-sex @profile)
+               "height" (.-height @profile)
+               "weight" (.-weight @profile)
+               "age" (.-age @profile)}))
        ])))
 
-(defn wrap-input
-  [e]
-  (fn [e]
-    [view {:style {:border-width 1
-                   :border-color "#ddd"
-                   :background-color "#ccc"}}
-     e]))
 
 (defn nav-edit
   [nav]
@@ -92,31 +91,38 @@
 
 (defn view-edit-profile
   [props]
-  (let [profile (-> realm (.objects "Profile")
-                    (aget 0))
-        name (r/atom profile.username)
-        sex (r/atom profile.sex)
-        age (r/atom profile.age)
-        height (r/atom profile.height)
-        weight (r/atom profile.weight)
-        pick-sex (r/atom false)
-        ]
+  (let [profile (subscribe [:get-profile])
+        profile @profile
+        name (r/atom (.-username profile))
+        sex (r/atom (.-sex profile))
+        age (r/atom (str (.-age profile)))
+        height (r/atom (str (.-height profile)))
+        weight (r/atom (str (.-weight profile)))
+        pick-sex (r/atom false)]
+    (print "in edit:" profile)
+    (print profile.username)
+    (print (.-username profile))
     (fn [props]
-      [view
+      [scroll-view
        [label-view "name"]
        [text-input {:style (:input-text styles)
                     :value @name
-                    :on-change #(reset! name %)}]
+                    :on-change-text #(reset! name %)}]
        [label-view "sex"]
        [touchable-opacity
         {:on-press #(swap! pick-sex not)}
         [value-text @sex]]
-       [modal {:visible @pick-sex}
-        [view
-         [picker {:selected-value @sex
+       [self-modal {:visible-atom pick-sex}
+        [view {:style {:background-color "white"
+                       :height 200
+                       :flex-direction "column"
+                       :align-items "stretch"}}
+         [picker {:style {:height 150}
+                  :selected-value @sex
                   :on-value-change #(reset! sex %)}
           [picker-item {:label "Female" :value "Female"}]
-          [picker-item {:label "Male" :value "Male"}]]]]
+          [picker-item {:label "Male" :value "Male"}]]
+         ]]
        [label-view "age"]
        [re-text-input {:regex #"[0-9]{0,3}"
                        :style (:input-text styles)
@@ -136,6 +142,19 @@
                        :keyboard-type "number-pad"
                        :value @weight
                        :on-change-text #(reset! weight %)}]
+       [touchable-highlight
+        {:style {:height 50
+                 :background-color system-color}
+         :on-press (fn [] (.write realm
+                                 #(doseq [[k v] [["username" @name]
+                                                 ["sex" @sex]
+                                                 ["age" (js/parseFloat @age)]
+                                                 ["weight" (js/parseFloat @weight)]
+                                                 ["height" (js/parseFloat @height)]] ]
+                                    (aset profile k v )))
+                     (dispatch [:refresh-profile ])
+                     (.goBack (:navigation props )))}
+        [text "save"]]
        ])))
 
 (def ProfileEdit
