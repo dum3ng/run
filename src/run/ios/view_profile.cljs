@@ -86,7 +86,7 @@
   (fn [nav]
     [view {:style {:padding-left 10 :padding-right 15}}
      [touchable-opacity
-      {:on-press #(nav "ProfileEdit")}
+      {:on-press #(nav "profile-edit")}
       [icon "edit" system-color 20]]]))
 
 (defn view-edit-profile
@@ -168,7 +168,8 @@
    {:title "Profile"
     :header (fn [navigation]
               (clj->js
-               {:right (r/as-element
+               {:visible true
+                :right (r/as-element
                         [nav-edit (.-navigate navigation)])}))}))
 
 (defn t []
