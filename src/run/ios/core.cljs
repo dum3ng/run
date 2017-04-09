@@ -14,7 +14,7 @@
                                    navigator]]
             [run.common.schema :refer [realm]]
             [run.ios.view-schedule :refer [view-schedule]]
-            [run.ios.view-history :refer [view-history]]
+            [run.ios.page-history :refer [page-history]]
             [run.ios.view-profile :refer [Profile
                                           ProfileDisplay
                                           ProfileEdit]]
@@ -33,15 +33,9 @@
 (def TabNavigator (.-TabNavigator Navigation))
 (def StackNavigator (.-StackNavigator Navigation))
 
-(def Schedule
-  (wrap-navigation-options view-schedule
-                           {:tabBar
-                            {:label "Schedule"
-                             :icon (fn [props]
-                                     (r/as-element
-                                      [icon "table" props.tintColor 20]))}}))
+
 (def History
-  (wrap-navigation-options view-history
+  (wrap-navigation-options page-history
                            {:tabBar
                             {:label "History"
                              :icon (fn [props] (r/as-element
@@ -57,8 +51,7 @@
 (def Tabs
   (TabNavigator.
    (clj->js
-    {:schedule {:screen Schedule}
-     :history {:screen History}
+    {:history {:screen History}
      :profile-display {:screen ProfileDisplay
                        :navigationOptions {:tabBar {:icon (fn
                                                             [props]
