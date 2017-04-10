@@ -87,7 +87,9 @@
     [view {:style {:padding-left 10 :padding-right 15}}
      [touchable-opacity
       {:on-press #(nav "profile-edit")}
-      [icon "edit" system-color 20]]]))
+      [icon {:name "edit"
+             :color system-color
+             :size 20}]]]))
 
 (defn view-edit-profile
   [props]

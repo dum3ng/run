@@ -10,16 +10,18 @@
 ;; here are some basic helper components
 (def Icon (js/require "react-native-vector-icons/FontAwesome"))
 
-(defn icon
-  [name tint size]
-  (let [s (r/atom )]
-    (-> (.getImageSource Icon name size tint)
-        (.then (fn [source]
-                 (reset! s source))))
-    (fn [name tint size]
-      [image {:source @s
-              :style {:width size
-                      :height size}}])))
+;; (defn icon
+;;   [name tint size]
+;;   (let [s (r/atom )]
+;;     (-> (.getImageSource Icon name size tint)
+;;         (.then (fn [source]
+;;                  (reset! s source))))
+;;     (fn [name tint size]
+;;       [image {:source @s
+;;               :style {:width size
+;;                       :height size}}])))
+
+(def icon (r/adapt-react-class (.-default Icon)))
 
 (defn re-text-input
   "This check the value against to a regex string when
@@ -55,3 +57,9 @@
                              :on-press #(reset! v false)}
           [text "close"]]]
         c]])))
+
+(defn h-box
+  [c]
+  (fn [c]
+    [view {:style {:flex-direction "row"}}
+     c]))

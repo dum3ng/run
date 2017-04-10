@@ -4,17 +4,10 @@
             [run.events]
             [run.subs]
             [run.common.rn :refer [app-registry
-                                   view
-                                   text
-                                   image
-                                   tabbar-ios
-                                   tabbar-ios-item
-                                   switch
-                                   touchable-highlight
-                                   navigator]]
+                                   ]]
             [run.common.schema :refer [realm]]
-            [run.ios.view-schedule :refer [view-schedule]]
             [run.ios.page-history :refer [page-history]]
+            [run.ios.page-run :refer [PageRun]]
             [run.ios.view-profile :refer [Profile
                                           ProfileDisplay
                                           ProfileEdit]]
@@ -39,30 +32,38 @@
                            {:tabBar
                             {:label "History"
                              :icon (fn [props] (r/as-element
-                                               [icon "hourglass-end" props.tintColor 20]))}}))
+                                               [icon {:name  "hourglass-end"
+                                                      :color props.tintColor
+                                                      :size 20}]))}}))
 
 (def Weather
   (wrap-navigation-options view-weather
                            {:tabBar
                             {:label "Weather"
                              :icon (fn [props] (r/as-element
-                                               [icon "snowflake-o" props.tintColor 20]))}}))
+                                               [icon {:name "snowflake-o"
+                                                      :size 20
+                                                      :color props.tintColor}]))}}))
 
 (def Tabs
   (TabNavigator.
    (clj->js
-    {:history {:screen History}
+    {:temp {:screen PageRun}
+     :history {:screen History}
      :profile-display {:screen ProfileDisplay
                        :navigationOptions {:tabBar {:icon (fn
                                                             [props]
                                                             (r/as-element
-                                                             [icon "cog" props.tintColor 20]))}}}
+                                                             [icon {:name "cog"
+                                                                    :size 20
+                                                                    :color props.tintColor}]))}}}
      ;;  :Weather {:screen Weather}
      })
    (clj->js {:navigationOptions {:header {:visible false}}
              :tabBarOptions {:activeTintColor "#e91e63"}})))
 
 (def App (StackNavigator. (clj->js {:tabs {:screen Tabs}
+                                    :page-run {:screen PageRun}
                                     :profile-edit {:screen ProfileEdit}})
                           (clj->js {:headerMode "screen"})))
 

@@ -21,7 +21,21 @@
                  :name "string"
                  :segments {:type "list" :objectType "Segment"}}})
 
+(def Coordinate
+  {:name "Coordinate"
+   :properties {:latitude "double"
+                :longitude "double" }})
 
+(def History
+  {:name "History"
+   :primaryKey "id"
+   :properties {:id "string"
+                :date "date"
+                :snapshot "string" ;; snapshot is a uri string for the snapshot image
+                :coordinates {:type "list" :objectType "Coordinate"}
+                :distance "double" ;; km
+                :duration "int" ;; seconds
+                }})
 
 (def Profile {:name "Profile"
               :properties {:id "string"
@@ -29,17 +43,10 @@
                            :height {:type  "float" :default 1.75}
                            :weight {:type  "float" :default 65}
                            :age {:type "float" :default 22.2}
-                           :sex {:type "string" :default "male"}
+                           :sex {:type "string" :default "Male"}
                            }})
 
-(def History {:name "History"
-              :properties {:id "string"
-                           :date "date"
-                           :map-image "string"
-                           :average-pace "float"
-                           :high-pace "float"
-                           :low-pace "float"
-                           :duration "float"}})
+
 ;; db
 ;; create a simple plan
 (def simple-plan-segments [["warm up" 300 0]
@@ -58,7 +65,7 @@
                                        simple-plan-segments))})
 
 (def profile {:id (.v4 uu)
-              :username "undefined"
+              :username "anynomous"
               :weight 50})
 ;;
 
@@ -70,8 +77,9 @@
                                                  [Segment
                                                   Plan
                                                   Profile
+                                                  Coordinate
                                                   History]))
-                              :schemaVersion 3
+                              :schemaVersion 5
                               })))
 (.write realm   #(.create realm "Plan" (clj->js simple-plan)))
 (.write realm #(.create realm "Profile" (clj->js profile)))
