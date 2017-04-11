@@ -5,7 +5,11 @@
                                    touchable-opacity
                                    touchable-without-feedback
                                    animated
-                                   dimensions]]
+                                   dimensions
+                                   alert]]
+            [run.subs]
+            [run.events]
+            [re-frame.core :refer [subscribe dispatch]]
             [run.common.schema :refer [realm]]
             [run.common.colors :as c]
             [run.common.core :refer [icon]]
@@ -88,6 +92,7 @@
                        :run-dist 0
                        :coord-id 0
                        :coords []
+                       :has-run false
                        :marker-source #js{}})
         seconds (r/cursor state [:seconds])
         run-state (r/cursor state [:run-state] ) ; one of ["idle" "running" "paused"] ;;;;;;;;
@@ -96,6 +101,7 @@
         old-coords (r/cursor state [:old-coords])
         run-dist (r/cursor state [:run-dist])
         region (r/cursor state [:region])
+        has-run (r/cursor state [:has-run])
         marker-source (r/cursor state [:marker-source])
         handler (fn [pos]
                   (print "fetch location..." (.. pos -coords -latitude))
@@ -133,10 +139,20 @@
                    :stroke-width 3}]
         [marker-animated {:image (:marker-source @state)
                           :coordinate @region}]]
+       [touchable-opacity {:style (:close-icon styles)
+                           :on-press (fn []
+                                       (let [quit #(do (.clearWatch (.-geolocation js/navigator) id)
+                                                       (.goBack (:navigation props)))]
+                                         (if @has-run (.alert alert "quit?" "You have started a run. Discard the data?"
+                                                              #js[#js{:text "cancel" :onPress #(print "cancel quit")}
+                                                                  #js{:text "discard" :onPress quit}])
+                                             (quit)))) }
+        [icon {:name "close" :size 30 :color "black"}]]
        [view {:style (:control styles)}
         [view {:style (:h-box styles)}
          [control-run {:run-state @run-state
-                       :start-fn #(reset! run-state "running")
+                       :start-fn #(do (reset! has-run true)
+                                      (reset! run-state "running"))
                        :pause-fn #(reset! run-state "paused")
                        :resume-fn #(reset! run-state "running")
                        :stop-fn (fn []
@@ -150,6 +166,7 @@
                                                                                       :duration 100
                                                                                       :snapshot "fake"
                                                                                       :coordinates @coords})))
+                                    (dispatch [:refresh-histories])
                                     (go-back)))
                        }]]
         [timer @seconds]
@@ -222,6 +239,12 @@
                          :flex-direction "column"
                          :align-items "stretch"}
              :map {:height 320}
+             :close-icon {:position "absolute"
+                          :top 30
+                          :width 30
+                          :height 30
+                          :left 10
+                          :z-index 10}
              :control {:flex 1
                        :background-color "yellow"
                        }

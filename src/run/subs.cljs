@@ -14,3 +14,8 @@
  :get-profile
  (fn [db _]
    (:profile db)))
+
+(reg-sub
+ :get-histories
+ (fn [db _]
+   (:histories db)))

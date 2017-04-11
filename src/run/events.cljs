@@ -49,3 +49,10 @@
    (let [profile (-> (.objects  realm "Profile")
                      (aget 0))]
      (assoc db :profile profile ))))
+
+(reg-event-db
+ :refresh-histories
+ (fn [db [_]]
+   (print "refresh-histories")
+   (let [histories (.objects realm "History")]
+     (assoc db :histories histories))))
