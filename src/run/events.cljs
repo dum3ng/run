@@ -56,3 +56,10 @@
    (print "refresh-histories")
    (let [histories (.objects realm "History")]
      (assoc db :histories histories))))
+
+(reg-event-db
+ :refresh-history-ds
+ (fn [db [_]]
+   (let [histories (.objects realm "History")
+         ds (:history-ds db)]
+     (assoc db :history-ds (.cloneWithRows ds  histories)))))

@@ -19,3 +19,8 @@
  :get-histories
  (fn [db _]
    (:histories db)))
+
+(reg-sub
+ :get-history-ds
+ (fn [db _]
+   (:history-ds db)))

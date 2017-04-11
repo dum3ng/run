@@ -26,22 +26,12 @@
 (defn page-history
   [props]
   (let [nav (.-navigate (:navigation props))
-        x (r/atom true)
-        histories (subscribe [:get-histories])
-        ds (DataSource. #js{:rowHasChanged  #(identical? %1 %2)})
-                                        ;        state (r/atom {:data-source (.cloneWithRows ds (or @histories #js[]))})
-        state (r/atome {:data-source ds})
-        data-source (r/cursor state [:data-source])]
-    (if (nil? @histories) (dispatch [:refresh-histories]))
+        ds (subscribe [:get-history-ds])
+        ]
+    (dispatch [:refresh-history-ds])
     (fn [props]
-
       [view {:style (:container styles)}
-       [text "sk?"]
-       [touchable-opacity
-        {:on-press #(swap! x not)}
-        [text "toggle"]]
-       [other @x]
-       [text {:style {:margin 10}} (.-length @histories)]
+
        [touchable-opacity
         {:style (:run styles)
          :active-opacity 0.5
@@ -49,14 +39,12 @@
         [icon {:name "superpowers"
                :size 30
                :color  c/run-icon}]]
-       (if-not (nil? data-source)
-         [list-view {:dataSource data-source
-                     :enable-empty-sections true
-                     :render-row (fn [row]
-                                   (r/as-element [view
-                                                  [text "distance"]
-                                                  [text (.-distance row)]]))}]
-         [view [text "no history"]])
+       [list-view {:dataSource @ds
+                   :enable-empty-sections true
+                   :render-row (fn [row]
+                                 (r/as-element [view
+                                                [text "distance"]
+                                                [text (.-distance row)]]))}]
        ])))
 
 ;; styles

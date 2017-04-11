@@ -166,7 +166,7 @@
                                                                                       :duration 100
                                                                                       :snapshot "fake"
                                                                                       :coordinates @coords})))
-                                    (dispatch [:refresh-histories])
+                                    (dispatch [:refresh-history-ds])
                                     (go-back)))
                        }]]
         [timer @seconds]
