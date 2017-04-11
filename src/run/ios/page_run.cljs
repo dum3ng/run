@@ -13,7 +13,8 @@
             [run.common.schema :refer [realm]]
             [run.common.colors :as c]
             [run.common.core :refer [icon]]
-            [run.common.utils :refer [wrap-navigation-options]]))
+            [run.common.utils :refer [wrap-navigation-options
+                                      format-float]]))
 
 ;; This is the page when you running.
 ;; Show a map and control elements.
@@ -29,7 +30,7 @@
 (def Icon (js/require "react-native-vector-icons/FontAwesome"))
 
 (declare styles)
-(declare button-run timer control-run)
+(declare  control-run info)
 
 (def watch-option #js{:enabelHighAccuracy true
                       :timeout 5000
@@ -82,7 +83,9 @@
 
 (defn page-run
   [props]
-  (let [state (r/atom {:seconds 0
+  (let [map-ref (subscribe [:get-map-ref])
+        state (r/atom {:hooked false
+                       :seconds 0
                        :region (AnimatedRegion. #js{:latitude initial-lat
                                                     :longitude initial-long
                                                     :latitudeDelta latitudeDelta
@@ -93,6 +96,7 @@
                        :coord-id 0
                        :coords []
                        :has-run false
+                       :ref nil
                        :marker-source #js{}})
         seconds (r/cursor state [:seconds])
         run-state (r/cursor state [:run-state] ) ; one of ["idle" "running" "paused"] ;;;;;;;;
@@ -102,7 +106,13 @@
         run-dist (r/cursor state [:run-dist])
         region (r/cursor state [:region])
         has-run (r/cursor state [:has-run])
+        ref (r/cursor state [:ref])
         marker-source (r/cursor state [:marker-source])
+        take-snapshot (fn [cb] (.takeSnapshot @ref #js{:latitude (.. @region -latitude -_value)
+                                                      :longitude (.. @region -longitude -_value)
+                                                      :latitudeDelta 0.02
+                                                      :longitudeDelta (* 0.02 aspectRatio)}
+                                             cb))
         handler (fn [pos]
                   (print "fetch location..." (.. pos -coords -latitude))
                   (let [now  #js{:latitude (.. pos -coords -latitude)
@@ -128,7 +138,12 @@
         "running" (js/setTimeout #(swap! seconds inc) 1000)
         ())
       [view {:style (:container styles)}
-       [map-animated {:style (:map styles)
+       [map-animated {:ref (fn [r] (print "map: " r)
+                             (print "ref: " @map-ref)
+                             (if-not (:hooked @state)
+                               (do (swap! state assoc :hooked true)
+                                   (dispatch [:set-map-ref r] ))))
+                      :style (:map styles)
                       :initial-region {:latitude initial-lat
                                        :longitude initial-long
                                        :latitude-delta latitudeDelta
@@ -147,8 +162,9 @@
                                                               #js[#js{:text "cancel" :onPress #(print "cancel quit")}
                                                                   #js{:text "discard" :onPress quit}])
                                              (quit)))) }
-        [icon {:name "close" :size 30 :color "black"}]]
+        [icon {:name "close" :size 20 :color "black"}]]
        [view {:style (:control styles)}
+        [info @run-dist @seconds]
         [view {:style (:h-box styles)}
          [control-run {:run-state @run-state
                        :start-fn #(do (reset! has-run true)
@@ -156,22 +172,34 @@
                        :pause-fn #(reset! run-state "paused")
                        :resume-fn #(reset! run-state "running")
                        :stop-fn (fn []
-                                  (let [go-back (.-goBack (:navigation props))]
+                                  (let [go-back (.-goBack (:navigation props))
+                                        ref @map-ref]
                                     (swap! state
                                            assoc :run-state "idle"
                                            :seconds 0)
-                                    (.write realm #(.create realm "History" (clj->js {:id (str (random-uuid))
-                                                                                      :date (js/Date.)
-                                                                                      :distance @run-dist
-                                                                                      :duration 100
-                                                                                      :snapshot "fake"
-                                                                                      :coordinates @coords})))
-                                    (dispatch [:refresh-history-ds])
-                                    (go-back)))
+                                    (print "map ref in stop: " )
+                                    (print (.-props ref))
+                                    (print (.-refs ref))
+                                    (print (.-context ref))
+                                    (print (.keys js/Object ref))
+                                    (.takeSnapshot ref
+                                                   300 300
+                                                   #js{:latitude (.. @region -latitude -_value)
+                                                       :longitude (.. @region -longitude -_value)
+                                                       :latitudeDelta 0.02
+                                                       :longitudeDelta (* 0.02 aspectRatio)}
+                                                   (fn [e data]
+                                                     (print data)
+                                                     (.write realm #(.create realm "History" (clj->js {:id (str (random-uuid))
+                                                                                                       :date (js/Date.)
+                                                                                                       :distance @run-dist
+                                                                                                       :duration @seconds
+                                                                                                       :snapshot (.-uri data)
+                                                                                                       :coordinates @coords})))
+                                                     (dispatch [:refresh-history-ds])
+                                                     (go-back)))))
                        }]]
-        [timer @seconds]
-        [text (str "distance " @run-dist " Km")]
-        [text "control area"]]])))
+        ]])))
 
 (def PageRun
   (wrap-navigation-options page-run
@@ -179,14 +207,7 @@
                             :header {:visible false}} ))
 
 ;; implements
-(defn button-run
-  [props]
-  (fn [props]
-    [touchable-opacity
-     {:style (:button-run styles)
-      :on-press (:on-press props)
-      :active-opacity 0.8}
-     [text {:style {:start-text styles}} "start"]]))
+
 
 (defn control-run
   "props keys:
@@ -197,7 +218,7 @@
   :stop-fn"
   [props]
   (fn [props]
-    [view
+    [view {:style {:flex-direction "row"}}
      [touchable-opacity
       {:style (:button-run styles)
        :on-press #(case (:run-state props)
@@ -210,28 +231,35 @@
          "idle" "start"
          "running" "pause"
          "paused" "resume")]]
-     [view {:style {:height (if (= "paused" (:run-state props)); TODO: use display not work. why?
-                              50
-                              0)}}
-      [touchable-opacity
-       {:style {:background-color "red"
-                }
-        :on-press (:stop-fn props)
-        :active-opacity 0.8}
-       [text {:style (:start-text styles)} "stop"]]]]))
+     [touchable-opacity {:style (assoc (:button-stop styles)
+                                       :width (if (= "paused" (:run-state props)) ; TODO: use display not work. why?
+                                                60
+                                                0))
+                         :on-press (:stop-fn props)}
 
-(defn timer
-  "This is just a timer text.
-  Accept a number of seconds, and adapt to style like:
-  hh:mm"
-  [seconds ]
-  (fn [seconds ]
-    (let [h  (quot seconds 60)
-          ht (if (< h 10) (str "0" h) (str h))
-          s (rem seconds 60)
-          st (if (< s 10) (str "0" s) (str s))]
-      [view 
-       [text {:style (:timer-text styles)} (str ht ":" st)]])))
+      [text {:style (:start-text styles)} "stop"]]]))
+
+(defn format-duration
+  [t]
+  (let  [h  (quot t 60)
+         ht (if (< h 10) (str "0" h) (str h))
+         s (rem t 60)
+         st (if (< s 10) (str "0" s) (str s))]
+    (str ht ":" st)))
+
+(defn info
+  "dis: distance in kilometer.
+  time: time in seconds"
+  [dis time]
+  [view {:style (:info styles)}
+   [view {:style (:info-item styles)}
+    [icon {:name "superpowers" :size 25 :color "white"}]
+    [text {:style (:info-text styles)}
+     (str (format-float dis 2) " km")]]
+   [view {:style (:info-item styles)}
+    [icon {:name "clock-o" :size 25 :color "white"}]
+    [text {:style (:info-text styles)} (format-duration time)]]]
+  )
 
 
 ;; styles
@@ -240,26 +268,50 @@
                          :align-items "stretch"}
              :map {:height 320}
              :close-icon {:position "absolute"
-                          :top 30
-                          :width 30
-                          :height 30
+                          :background-color "rgba(0,0,0,0)"
+                          :top 20
+                          :width 20
+                          :height 20
                           :left 10
                           :z-index 10}
              :control {:flex 1
-                       :background-color "yellow"
+                       :justify-content "space-around"
+                       :background-color "#64467A"
                        }
              :h-box  {:flex-direction "row"
                       :justify-content "center"}
-             :button-run {:width 60
-                          :height 60
-                          :border-radius 30
+             :info {:flex-direction "row"
+                    :justify-content "space-around"
+                    :margin-vertical 20
+                    }
+             :info-item {:align-items "center"
+                         :justify-content "space-around"}
+             :info-text {:font-size 16
+                         :color "white"
+                         :padding-top 10}
+             :button-run {:width 80
+                          :height 80
+                          :border-radius 40
                           :align-items "center"
                           :justify-content "center"
                           :background-color c/button-run}
+             :button-stop {:margin-left 20
+                           :margin-top 10
+                           :align-items "center"
+                           :justify-content "center"
+                           :width 60
+                           :height 60
+                           :border-radius 30
+                           :background-color c/run-icon}
              :start-text {:font-size 20
+                          :background-color "rgba(0,0,0,0)"
+                          :text-align "center"
                           :color "white"}
-             :timer-text {:font-size 60}
+             :timer-text {:text-align "center"
+                          :font-size 60}
+             
              })
+
 
 
 

@@ -3,6 +3,6 @@
 
 (def tab-tint "#e91e63")
 
-(def run-icon "blue")
+(def run-icon "#E15D69")
 
-(def button-run "purple")
+(def button-run "#38BEAE")

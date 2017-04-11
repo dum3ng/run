@@ -6,7 +6,8 @@
             [run.common.rn :refer [app-registry
                                    ]]
             [run.common.schema :refer [realm]]
-            [run.ios.page-history :refer [page-history]]
+            [run.ios.page-history :refer [page-history
+                                          go-run]]
             [run.ios.page-run :refer [PageRun]]
             [run.ios.view-profile :refer [Profile
                                           ProfileDisplay
@@ -27,14 +28,20 @@
 (def StackNavigator (.-StackNavigator Navigation))
 
 
+
+
 (def History
   (wrap-navigation-options page-history
-                           {:tabBar
+                           {:title "history"
+                            :tabBar
                             {:label "History"
                              :icon (fn [props] (r/as-element
                                                [icon {:name  "hourglass-end"
                                                       :color props.tintColor
-                                                      :size 20}]))}}))
+                                                      :size 20}]))}
+                            :header (fn [navigation header]
+                                      #js{:visible true
+                                          :right (r/as-element [go-run (.-navigate navigation)])})}))
 
 (def Weather
   (wrap-navigation-options view-weather
@@ -48,7 +55,7 @@
 (def Tabs
   (TabNavigator.
    (clj->js
-    {:temp {:screen PageRun}
+    {
      :history {:screen History}
      :profile-display {:screen ProfileDisplay
                        :navigationOptions {:tabBar {:icon (fn

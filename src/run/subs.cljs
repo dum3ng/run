@@ -24,3 +24,8 @@
  :get-history-ds
  (fn [db _]
    (:history-ds db)))
+
+(reg-sub
+ :get-map-ref
+ (fn [db _]
+   (:map-ref db)))

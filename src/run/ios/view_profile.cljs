@@ -57,10 +57,7 @@
            (:key-text styles)}
      t]))
 
-(defn format [n digit]
-  (let [s (str n)
-        [f l & none] (clojure.string/split s #"\." )]
-    (str f (take digit l))))
+
 
 (defn view-profile-
   [props]

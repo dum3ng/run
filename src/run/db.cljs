@@ -12,4 +12,5 @@
              :profile nil
              :histories nil
              :history-ds (DataSource. #js{:rowHasChanged  #(identical? %1 %2)})
+             :map-ref nil
              :need-refresh false})
