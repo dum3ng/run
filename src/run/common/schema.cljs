@@ -1,4 +1,4 @@
-(ns run.common.schema)
+(ns run.common.schema  )
 
 (def Realm (js/require "realm"))
 (def uu (js/require "uuid"))
@@ -83,6 +83,12 @@
                               })))
 (.write realm   #(.create realm "Plan" (clj->js simple-plan)))
 (.write realm #(.create realm "Profile" (clj->js profile)))
+
+
+
+
+
+
 ;; (binding [realm (Realm.)]
 ;;   (.close realm))
 

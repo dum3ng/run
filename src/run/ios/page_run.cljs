@@ -86,6 +86,7 @@
   (let [map-ref (subscribe [:get-map-ref])
         state (r/atom {:hooked false
                        :seconds 0
+                       :timer-id nil
                        :region (AnimatedRegion. #js{:latitude initial-lat
                                                     :longitude initial-long
                                                     :latitudeDelta latitudeDelta
@@ -133,13 +134,15 @@
         id (watch)]
     (-> (.getImageSource Icon "dot-circle-o" 20 "red")
         (.then #(reset! marker-source %)))
+    (print "watch id" id)
     (fn [props]
-      (case @run-state
-        "running" (js/setTimeout #(swap! seconds inc) 1000)
-        ())
+      (if (= @run-state "running")
+        (if (-> @state :timer-id nil?)
+          (swap! state assoc :timer-id (js/setInterval #(swap! seconds inc) 1000)))
+        (do (some-> (:timer-id @state) js/clearInterval)
+            (swap! state assoc :timer-id nil)))
       [view {:style (:container styles)}
-       [map-animated {:ref (fn [r] (print "map: " r)
-                             (print "ref: " @map-ref)
+       [map-animated {:ref (fn [r]
                              (if-not (:hooked @state)
                                (do (swap! state assoc :hooked true)
                                    (dispatch [:set-map-ref r] ))))
@@ -148,7 +151,8 @@
                                        :longitude initial-long
                                        :latitude-delta latitudeDelta
                                        :longitude-delta longitudeDelta}
-                      :region @region}
+                      :region @region
+                      }
         [polyline {:coordinates @coords
                    :stroke-color "blue"
                    :stroke-width 3}]
@@ -162,7 +166,7 @@
                                                               #js[#js{:text "cancel" :onPress #(print "cancel quit")}
                                                                   #js{:text "discard" :onPress quit}])
                                              (quit)))) }
-        [icon {:name "close" :size 20 :color "black"}]]
+        [icon {:name "chevron-left" :size 20 :color c/button-run}]]
        [view {:style (:control styles)}
         [info @run-dist @seconds]
         [view {:style (:h-box styles)}
@@ -175,29 +179,24 @@
                                   (let [go-back (.-goBack (:navigation props))
                                         ref @map-ref]
                                     (swap! state
-                                           assoc :run-state "idle"
-                                           :seconds 0)
-                                    (print "map ref in stop: " )
-                                    (print (.-props ref))
-                                    (print (.-refs ref))
-                                    (print (.-context ref))
-                                    (print (.keys js/Object ref))
-                                    (.takeSnapshot ref
+                                           assoc :run-state "idle")
+                                    (.clearWatch (.-geolocation js/navigator) id)
+                                    (js/clearInterval (:timer-id @state))
+                                    (.takeSnapshot (.getNode ref)
                                                    300 300
                                                    #js{:latitude (.. @region -latitude -_value)
                                                        :longitude (.. @region -longitude -_value)
                                                        :latitudeDelta 0.02
                                                        :longitudeDelta (* 0.02 aspectRatio)}
                                                    (fn [e data]
-                                                     (print data)
-                                                     (.write realm #(.create realm "History" (clj->js {:id (str (random-uuid))
-                                                                                                       :date (js/Date.)
-                                                                                                       :distance @run-dist
-                                                                                                       :duration @seconds
-                                                                                                       :snapshot (.-uri data)
-                                                                                                       :coordinates @coords})))
-                                                     (dispatch [:refresh-history-ds])
-                                                     (go-back)))))
+                                                     (.write realm #(do
+                                                                      (.create realm "History" (clj->js {:id (str (random-uuid))
+                                                                                                         :date (js/Date.)
+                                                                                                         :distance @run-dist
+                                                                                                         :duration @seconds
+                                                                                                         :snapshot (.-uri data)
+                                                                                                         :coordinates @coords}))
+                                                                      (go-back)))))))
                        }]]
         ]])))
 

@@ -14,7 +14,8 @@
                                    scroll-view
                                    touchable-highlight
                                    ]]
-            [run.common.utils :refer [wrap-navigation-options]]
+            [run.common.utils :refer [wrap-navigation-options
+                                      format-float]]
             [run.common.core :refer [icon
                                      re-text-input
                                      self-modal]]
@@ -72,9 +73,9 @@
                                  [value-text (val t)]])
               {"name" (.-username @profile)
                "sex" (.-sex @profile)
-               "height" (.-height @profile)
-               "weight" (.-weight @profile)
-               "age" (.-age @profile)}))
+               "height" (format-float (.-height @profile) 2)
+               "weight" (format-float (.-weight @profile) 1)
+               "age" (format-float (.-age @profile) 1)}))
        ])))
 
 
@@ -126,23 +127,25 @@
        [re-text-input {:regex #"[0-9]{0,3}"
                        :style (:input-text styles)
                        :keyboard-type "number-pad"
-                       :value @age
+                       :value (format-float @age 1)
                        :on-change-text #(do (print "after:" %)
                                             (reset! age %)) }]
        [label-view "height"]
        [re-text-input {:regex #"[0-9]{0,3}"
                        :style (:input-text styles)
-                       :value @height
+                       :value (format-float @height 1)
                        :keyboard-type "number-pad"
                        :on-change-text #(reset! height %)}]
        [label-view "weight"]
        [re-text-input {:regex #"[0-9]{0,3}"
                        :style (:input-text styles)
                        :keyboard-type "number-pad"
-                       :value @weight
+                       :value (format-float @weight 1)
                        :on-change-text #(reset! weight %)}]
        [touchable-highlight
         {:style {:height 50
+                 :align-items "center"
+                 :justify-content "center"
                  :background-color system-color}
          :on-press (fn [] (.write realm
                                  #(doseq [[k v] [["username" @name]
@@ -153,7 +156,8 @@
                                     (aset profile k v )))
                      (dispatch [:refresh-profile ])
                      (.goBack (:navigation props )))}
-        [text "save"]]
+        [text {:style {:color "white"
+                       :font-size 20}} "save"]]
        ])))
 
 (def ProfileEdit

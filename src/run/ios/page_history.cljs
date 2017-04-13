@@ -18,7 +18,8 @@
                                       format-date]]))
 
 
-(def ListView (.-ListView (js/require "realm/react-native")))
+                                        ;(def ListView (.-ListView (js/require "realm/react-native")))
+(def ListView (.-ListView (js/require "react-native")))
 (def list-view (r/adapt-react-class ListView))
 (def DataSource (.-DataSource ListView))
 
@@ -33,34 +34,36 @@
 (defn delete-history
   [h]
   (.write realm
-          #(do (.delete realm h)
-               (dispatch [:refresh-history-ds]))))
+          #(.delete realm h)
+          ))
 
 
 
 (defn history
-  [h]
-  (fn [h]
-    [view {:style (:history-container styles)}
-     [view {:style {:flex-direction "row"
-                    :padding-horizontal 20
-                    :padding-vertical 10
-                    :justify-content "space-between"}}
-      [text (format-date(.-date h))]
-      [text (format-time (.-duration h))]]
-     [image {:style {:height 100
-                     :background-color "#ccc"}
-             :source #js{:uri (.-snapshot h)}}]
-     [view {:style (:history-action-container styles)}
-      [touchable-opacity {:style (:history-action styles)
-                          :on-press (fn [] (.showActionSheetWithOptions action-sheet-ios
-                                                                       #js{:options #js["delete" "cancel"]
-                                                                           :cancelButtonIndex 1}
-                                                                       #(if (= 0 %)
-                                                                          (delete-history h))))}
-       [icon {:name "ellipsis-h" :size 30}]]]
+  [p]
+  (let [h (:history p)
+        handler (:on-press p)]
+    (fn [p]
+      [view {:style (:history-container styles)}
+       [view {:style {:flex-direction "row"
+                      :padding-horizontal 20
+                      :padding-vertical 10
+                      :justify-content "space-between"}}
+        [text (format-date(.-date h))]
+        [text (format-time (.-duration h))]]
+       [image {:style {:height 100
+                       :background-color "#ccc"}
+               :source #js{:uri (.-snapshot h)}}]
+       [view {:style (:history-action-container styles)}
+        [touchable-opacity {:style (:history-action styles)
+                            :on-press (fn [] (.showActionSheetWithOptions action-sheet-ios
+                                                                         #js{:options #js["delete" "cancel"]
+                                                                             :cancelButtonIndex 1}
+                                                                         #(if (= % 0)
+                                                                            (handler))))}
+         [icon {:name "ellipsis-h" :size 30}]]]
 
-     ]))
+       ])))
 
 
 (defn go-run
@@ -74,18 +77,30 @@
             :size 20
             :color  c/run-icon}]]))
 
+(defn get-hs
+  []
+  (.sorted  (.objects realm "History") "date" true))
+
 (defn page-history
   [props]
   (let [nav (.-navigate (:navigation props))
-        ds (subscribe [:get-history-ds])
+        data-source (DataSource. #js{:rowHasChanged #(identity true)})
+        hs (get-hs)
+        ds (r/atom (.cloneWithRows data-source hs))
+        ;; hs (doto hs (.addListener (fn [x cs] (print "changed.")
+        ;;                             (reset! ds (.cloneWithRows @ds x)))))
         ]
-    (dispatch [:refresh-history-ds])
+    (.addListener realm "change" #(do (print "change." (.-length (get-hs)))
+                                      (reset! ds (.cloneWithRows @ds (get-hs)))))
     (fn [props]
       [view {:style (:container styles)}
+       [touchable-opacity {:on-press #(reset! ds (.cloneWithRows @ds (get-hs)))}
+        [icon {:name "refresh" :size 30}]]
        [list-view {:dataSource @ds
                    :enable-empty-sections true
                    :render-row (fn [row]
-                                 (r/as-element [history row]))}]
+                                 (r/as-element [history {:history row
+                                                         :on-press #(delete-history row)}]))}]
        ])))
 
 ;; styles

@@ -57,13 +57,13 @@
    (let [histories (.objects realm "History")]
      (assoc db :histories histories))))
 
-(reg-event-db
- :refresh-history-ds
- (fn [db [_]]
-   (let [histories (-> (.objects realm "History")
-                       (.sorted  "date" true))
-         ds (:history-ds db)]
-     (assoc db :history-ds (.cloneWithRows ds  histories)))))
+;; (reg-event-db
+;;  :refresh-history-ds
+;;  (fn [db [_]]
+;;    (let [histories (-> (.objects realm "History")
+;;                        (.sorted  "date" true))
+;;          ds (:history-ds db)]
+;;      (assoc db :history-ds (.cloneWithRows ds  histories)))))
 
 (reg-event-db
  :set-map-ref

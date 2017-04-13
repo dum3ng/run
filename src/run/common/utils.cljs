@@ -47,11 +47,10 @@
 (defn takex
   [n coll p]
   (if (< (count coll) n)
-    (take n   (concat coll (repeat (- n (count coll)) p)))))
+    (take n   (concat coll (repeat (- n (count coll)) p)))
+    (take n coll)))
 
 (defn format-float [n digit]
   (let [s (str n)
-        [f l & none] (clojure.string/split s #"\." )
-        l (if (< (count l) digit)
-            ())]
+        [f l & none] (clojure.string/split s #"\." )]
     (str f "." (apply str (takex digit l 0)))))
