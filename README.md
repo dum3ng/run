@@ -1,14 +1,19 @@
 # run
 
-A Clojure library designed to ... well, that part is up to you.
+A demo mobile app written with re-natal. Just to verify whether clojurescript is suitable for mobile devs.
+
+**note**: have not clean the code...
 
 ## Usage
 
-FIXME
+```
+$ yarn install
+$ lein figwheel
+$ react-native run-ios
+```
 
 ## License
 
-Copyright © 2017 FIXME
+Copyright © 2017 dumeng
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Distributed under the MIT.
