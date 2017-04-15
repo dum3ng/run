@@ -20,6 +20,16 @@
         r (rem ss t)]
     [q r]))
 
+(defn padding
+  "give a number n, if the length of its string is less than x,
+  add padding 0 before it."
+  [n x]
+  (let [s (str n)
+        c (count s)]
+    (if (< c x)
+      (str (apply str (repeat (- x c) "0")) s)
+      (str n))))
+
 (defn format-date
   "return format:
   xxxx年xx月xx日 12:32"
@@ -29,7 +39,8 @@
         day (.getDate da)
         hour (.getHours da)
         min (.getMinutes da)]
-    (str year "年" mon "月" day "日" hour ":" min)))
+    (str year "年" mon "月" day "日 " (padding hour 2) ":"
+         (padding min 2))))
 
 (defn format-time
   "Take seconds to the format dd:hh or

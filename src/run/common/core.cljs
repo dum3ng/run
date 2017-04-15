@@ -51,11 +51,15 @@
                       :align-items "stretch"
                       :justify-content "flex-end"}}
         [view {:style {:flex-direction "row"
+                       :background-color "#ccc"
+                       :justify-content "flex-end"
                        :height 50}}
-         [touchable-opacity {:style {:flex 1
-                                     :background-color "#ccc"}
+         [touchable-opacity {:style {:width 20
+                                     :height 20
+                                     :justify-content "center"
+                                     :align-items "center"}
                              :on-press #(reset! v false)}
-          [text "close"]]]
+          [icon {:name "close" :size 20}]]]
         c]])))
 
 (defn h-box

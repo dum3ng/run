@@ -15,6 +15,7 @@
             [run.ios.view-weather :refer [view-weather]]
             [run.common.utils :refer [wrap-navigation-options]]
             [run.common.core :refer [icon]]
+            [run.ios.page-test :refer [PageTest]]
             ))
 
 (def ReactNative (js/require "react-native"))
@@ -55,8 +56,7 @@
 (def Tabs
   (TabNavigator.
    (clj->js
-    {
-     :history {:screen History}
+    {:history {:screen History}
      :profile-display {:screen ProfileDisplay
                        :navigationOptions {:tabBar {:icon (fn
                                                             [props]
@@ -64,7 +64,8 @@
                                                              [icon {:name "cog"
                                                                     :size 20
                                                                     :color props.tintColor}]))}}}
-     ;;  :Weather {:screen Weather}
+
+     :weather {:screen Weather}
      })
    (clj->js {:navigationOptions {:header {:visible false}}
              :tabBarOptions {:activeTintColor "#e91e63"}})))

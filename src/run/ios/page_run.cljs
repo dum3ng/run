@@ -154,8 +154,8 @@
                       :region @region
                       }
         [polyline {:coordinates @coords
-                   :stroke-color "blue"
-                   :stroke-width 3}]
+                   :stroke-color "#40E942"
+                   :stroke-width 5}]
         [marker-animated {:image (:marker-source @state)
                           :coordinate @region}]]
        [touchable-opacity {:style (:close-icon styles)
@@ -180,6 +180,7 @@
                                         ref @map-ref]
                                     (swap! state
                                            assoc :run-state "idle")
+                                    (print "clear watch:" id)
                                     (.clearWatch (.-geolocation js/navigator) id)
                                     (js/clearInterval (:timer-id @state))
                                     (.takeSnapshot (.getNode ref)
